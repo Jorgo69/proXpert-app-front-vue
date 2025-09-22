@@ -94,6 +94,8 @@ const goTo = (routeName) => {
 </script>
 
 <style scoped>
+@reference "@/assets/styles/tailwind.css";
+
 .desktop-header .nav-links .nav-link {
   @apply relative cursor-pointer px-4 py-2;
 }
