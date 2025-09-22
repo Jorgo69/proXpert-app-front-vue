@@ -1,0 +1,9 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+
+/* * définir les couleurs personnalisées via variables CSS */ */
+/* @theme {
+  --color-primary: #FF0000;
+  --color-secondary: #007BFF;
+} */
