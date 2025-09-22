@@ -57,8 +57,8 @@ const buttonClasses = computed(() => {
   };
 
   const variantClasses = {
-    primary: 'bg-red-500 hover:bg-red-800 text-white',
-    secondary: 'bg-transparent border border-red-600 text-red-600 hover:bg-red-600 hover:text-white',
+    primary: 'bg-primary hover:bg-red-800 text-white',
+    secondary: 'bg-white border border-red-600 text-red-600 hover:bg-red-600 hover:text-white',
     nav: 'text-black hover:text-primary', // Ajoutez des styles pour les liens ici
   };
 
