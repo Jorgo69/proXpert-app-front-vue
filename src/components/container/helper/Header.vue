@@ -17,7 +17,7 @@
 
         <!-- Boutons -->
         <div class="flex gap-2">
-          <BaseButton variant="primary" size="small">
+          <BaseButton @click="goTo('register')" variant="primary" size="small">
             {{ $t('S\'inscrire') }}
           </BaseButton>
           <BaseButton variant="secondary" size="small">
