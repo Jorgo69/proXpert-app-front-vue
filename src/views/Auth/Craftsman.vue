@@ -45,7 +45,7 @@ import Step1 from './CraftsmanStep/Step1.vue'
 import Step2 from './CraftsmanStep/Step2.vue'
 import Step3 from './CraftsmanStep/Step3.vue'
 import Step4 from './CraftsmanStep/Step4.vue'
-import { validateStep } from '@/utils/validators/register/craftsman-validator'
+import { validateStep, validateSteps1And2 } from '@/utils/validators/register/craftsman-validator'
 import { useToast } from '@/composables/useToast'
 import BaseButton from '@/components/common/BaseButton.vue'
 import api from '@/utils/api'
@@ -64,10 +64,11 @@ const steps = [
 const currentStep = ref(1)
 
 const form = reactive({
-  accountType: 'craftman_individual', // Doit correspondre à l'initialisation de Step1
+  accountType: 'craftsman_individual', // Doit correspondre à l'initialisation de Step1
 
   // étape 1
-  nip: '',
+  npi: '',
+  ifu: '',
   name: '',
   firstname: '',
   email: '',
@@ -75,14 +76,15 @@ const form = reactive({
   password: '',
   password_confirmation: '',
   location: '',
+  image: '',
 
   // étape 2
-  secteur: '',
-  metier: '',
-  specialite: '',
+  sector: '',
+  sub_sectors: [],
+  speciality: '',
   experience: '',
-  diplomes: '',
-  portfolio: [],
+  documents: [],
+  commercial_register: [],
 
   // étape 3
   verificationCode: '',
@@ -92,7 +94,7 @@ const form = reactive({
 
   // étape 4
   plan: '',
-  acceptConditions: false,
+  // acceptConditions: false,
 })
 
 const errors = reactive({})
@@ -124,36 +126,96 @@ async function nextStep() {
 
   // Étape 2 → register
   if (currentStep.value === 2) {
-    try {
-      // Champs strictement nécessaires à l'API register
-      const payload = {
-        name: form.name,
-        firstname: form.firstname,
-        email: form.email,
-        telephone: form.telephone,
-        password: form.password,
-        password_confirmation: form.password_confirmation,
+      const allErrors = validateSteps1And2(form)
+  
+      if (Object.keys(allErrors).length > 0) {
+        Object.keys(errors).forEach((k) => delete errors[k])
+        Object.assign(errors, allErrors)
+        addToast('Veuillez corriger toutes les erreurs', 'error')
+        return
       }
 
-      console.log('Payload envoyé:', payload)
+      try {
+        // Créer un FormData pour envoyer les fichiers
+        const formData = new FormData()
+        
+        // Champs texte
+        formData.append('type', form.accountType)
+        formData.append('name', form.name)
+        formData.append('firstname', form.firstname)
+        formData.append('email', form.email)
+        formData.append('telephone', form.telephone)
+        formData.append('password', form.password)
+        formData.append('password_confirmation', form.password_confirmation)
+        
+        if (form.location) formData.append('location', form.location)
+        if (form.city) formData.append('city_id', form.city)
+        if (form.sector) formData.append('sector_id', form.sector)
+        if (form.speciality) formData.append('speciality', form.speciality)
+        if (form.experience) formData.append('experience_year', form.experience)
+        
+        // Champs conditionnels selon le type de compte
+        if (form.accountType === 'craftsman_individual' && form.npi) {
+          formData.append('npi', form.npi)
+        }
+        
+        if (form.accountType === 'craftsman_entreprise') {
+          if (form.ifu) formData.append('ifu', form.ifu)
+          if (form.company_name) formData.append('company_name', form.company_name)
+        }
+        
+        // Image de profil (single file)
+        if (form.image && form.image.length > 0) {
+          formData.append('image', form.image[0]) // ← Prendre le premier fichier
+        }
+        
+        // Registre de commerce (single file pour entreprise)
+        if (form.accountType === 'craftsman_entreprise' && 
+            form.commercial_register && 
+            form.commercial_register.length > 0) {
+          formData.append('commercial_register', form.commercial_register[0]) // ← Prendre le premier
+        }
+        
+        // Documents (multiple files pour entreprise)
+        // if (form.accountType === 'craftsman_entreprise' &&
+        if (form.documents && 
+            form.documents.length > 0) {
+          form.documents.forEach((doc, index) => {
+            formData.append(`documents[${index}]`, doc) // ← Array de fichiers
+            // OU si le backend attend juste "documents[]":
+            // formData.append('documents[]', doc)
+          })
+        }
+        
+        // Sous-secteurs (array d'IDs)
+        if (form.sub_sectors && form.sub_sectors.length > 0) {
+          form.sub_sectors.forEach((subSectorId, index) => {
+            formData.append(`sub_sector_id[${index}]`, subSectorId)
+            // OU si le backend attend "sub_sector_id[]":
+            // formData.append('sub_sector_id[]', subSectorId)
+          })
+        }
 
-      const res = await api.post('/register', payload, {
-        // headers: { 'Content-Type': 'multipart/form-data' },
-        headers: { 'Content-Type': 'application/json' },
-      })
+        console.log('FormData envoyé (aperçu):')
+        for (let [key, value] of formData.entries()) {
+          console.log(key, value)
+        }
 
-      if (res.data.success) {
-        addToast('Code envoyé par SMS', 'success')
+        const res = await api.post('/register', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }, // ← Important !
+        })
 
-        // stocker infos utiles pour l’étape 3
-        form.validity_code_timestamp = res.data.validity_code_timestamp
-        form.verification_code = res.data.verification_code
-        form.new_email = res.data.new_email || ''
-        form.email = res.data.email || form.email
+        if (res.data.success) {
+          addToast('Code envoyé par SMS', 'success')
 
-        console.log('DEV: code reçu =', res.data.verification_code)
+          form.validity_code_timestamp = res.data.validity_code_timestamp
+          form.verification_code = res.data.verification_code
+          form.new_email = res.data.new_email || ''
+          form.email = res.data.email || form.email
 
-        currentStep.value = 3
+          console.log('DEV: code reçu =', res.data.verification_code)
+
+          currentStep.value = 3
       } else {
         addToast("Erreur lors de l'inscription", 'error')
       }

@@ -16,7 +16,7 @@
         Secteur d'activité *
       </label>
       <select 
-        v-model="form.secteur"
+        v-model="form.sector"
         name="sector"
         @change="onSectorChange"
         class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-200 focus:border-red-500"
@@ -98,7 +98,6 @@
 
     <!-- Document -->
     <BaseFileUpload
-      v-if="isEntreprise"
       label="Vos documents justificatifs "
       v-model="form.documents"
       :multiple="true"
@@ -136,7 +135,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import api from '@/utils/api'
 import FormField from '@/components/common/FormField.vue'
 import BaseMultiSelect from '../../../components/common/forms/BaseMultiSelect.vue'
@@ -146,6 +145,10 @@ const props = defineProps({
   form: Object,
   errors: Object
 })
+
+// 💡 On utilise form.accountType du parent
+const isIndividual = computed(() => props.form.accountType === 'craftsman_individual');
+const isEntreprise = computed(() => props.form.accountType === 'craftsman_entreprise');
 
 const form = props.form
 
@@ -205,13 +208,13 @@ const onSectorChange = async () => {
   form.sub_sectors = []
   subSectorOptions.value = []
   
-  if (!form.secteur) return
+  if (!form.sector) return
   
   try {
     loadingSubSectors.value = true
     // const response = await api.get(`/vbeta/sub-sectors?sector_id=${form.secteur}`)
     // Injecte l'ID directement dans le chemin de l'URL
-    const response = await api.get(`/vbeta/sectors/${form.secteur}/sub-sectors`);
+    const response = await api.get(`/vbeta/sectors/${form.sector}/sub-sectors`);
     const subSectors = response.data.data || response.data
     subSectorOptions.value = subSectors.map(s => ({
       label: s.name,
