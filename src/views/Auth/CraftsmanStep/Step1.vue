@@ -1,25 +1,54 @@
 <template>
-  <div class="grid md:grid-cols-2 gap-6">
-    <FormField name="nipi" label="NIPI/IFU *" v-model="form.nipi" :error="errors.nipi" placeholder="Votre numéro NIPI ou IFU" />
-    <FormField name="nom" label="Nom *" v-model="form.nom" :error="errors.nom" />
-    <FormField name="prenom" label="Prénom *" v-model="form.prenom" :error="errors.prenom" />
-    <FormField name="email" label="Email *" type="email" v-model="form.email" :error="errors.email" />
-    <FormField name="telephone" label="Téléphone *" type="tel" v-model="form.telephone" :error="errors.telephone" />
-    <div class="md:col-span-2">
-      <FormField name="adresse" label="Adresse complète *" v-model="form.adresse" :error="errors.adresse" />
-    </div>
-    <FormField name="password" label="Mot de passe *" type="password" v-model="form.password" :error="errors.password" />
-    <FormField name="passwordConfirm" label="Confirmation *" type="password" v-model="form.passwordConfirm" :error="errors.passwordConfirm" />
-  </div>
+  <Container class="grid md:grid-cols-2 gap-6">
+
+    <BaseSwitch v-model="accountType" active-value="craftman_entreprise" inactive-value="craftman_individual">
+      <span v-if="isIndividual"> A votre propre compte ?</span>
+      <span v-if="isEntreprise"> Etes vous une entreprise ?</span>
+    </BaseSwitch>
+
+    <FormField v-if="isIndividual" name="npi" label="NPI " required v-model="form.nip" :error="errors.nip" placeholder="Votre numéro NPI" />
+
+    <FormField v-if="isEntreprise" name="ifu" label="IFU " required v-model="form.ifu" :error="errors.ifu" placeholder="Votre numéro IFU" />
+
+    <FormField name="name" label="Nom " v-model="form.name" :error="errors.name" placeholder="Votre Nom" required/>
+    <FormField name="firstname" label="Prénom " v-model="form.firstname" :error="errors.firstname" placeholder="Votre Prenom" required />
+    <FormField name="email" label="Email " type="email" v-model="form.email" :error="errors.email" placeholder="Votre Email" required />
+    <FormField name="telephone" label="Téléphone " type="tel" v-model="form.telephone" :error="errors.telephone" placeholder="Votre Numero de telephone" required />
+    <!-- <div class="md:col-span-2"> -->
+      <FormField name="location" label="Adresse complète " v-model="form.location" :error="errors.location" placeholder="Votre localisation" required />
+    <!-- </div> -->
+     
+    <FormField name="password" label="Mot de passe " type="password" v-model="form.password" :error="errors.password" placeholder="Votre Mot de passe" required />
+    <FormField name="password_confirmation" label="Confirmation " type="password" v-model="form.password_confirmation" :error="errors.password_confirmation" placeholder="Confimez votre Mot de passe" required />
+
+    
+  </Container>
 </template>
 
 <script setup>
-import { toRefs } from 'vue'
+import { computed, ref, watch } from 'vue';
 import FormField from '@/components/common/FormField.vue'
+import Container from '../../../components/common/Container.vue';
+import BaseSwitch from '../../../components/common/forms/BaseSwitch.vue';
 
 // On reçoit le form et errors du parent
 const props = defineProps({
   form: Object,
   errors: Object
 })
+
+const accountType = ref('craftman_individual');
+
+// 💡 Propriétés calculées pour simplifier l'affichage/validation
+const isIndividual = computed(() => accountType.value === 'craftman_individual');
+const isEntreprise = computed(() => accountType.value === 'craftman_entreprise');
+
+watch(accountType, (newValue, oldValue) => {
+  console.log("Ancienne valeur :", oldValue);
+  console.log("Nouvelle valeur (mise à jour) :", newValue);
+  console.log("---");
+});
+
+
+
 </script>

@@ -1,14 +1,11 @@
 <template>
-  <!-- <div class="min-h-screen bg-gray-50 py-8"></div> -->
-  <Container class="">
-    <!-- <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8"> -->
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       <StepProgress :steps="steps" :currentStep="currentStep" />
 
-      <Container class="bg-white rounded-2xl hover:shadow-lg shadow-red-100 p-8">
-
+      <div class="bg-white rounded-2xl shadow-lg p-8">
         <Step1 v-if="currentStep === 1" :form="form" :errors="errors" />
-        <Step2 v-if="currentStep === 2" :form="form" :errors="errors" :account-type="form.accountType"  />
+        <Step2 v-if="currentStep === 2" :form="form" :errors="errors" />
         <Step3 v-if="currentStep === 3" :form="form" :errors="errors" />
         <Step4 v-if="currentStep === 4" :form="form" :errors="errors" />
 
@@ -31,26 +28,22 @@
             {{ currentStep === steps.length ? 'Finaliser' : 'Continuer' }}
           </BaseButton>
         </div>
-
-      </Container>
+      </div>
     </div>
-  </Container>
+  </div>
 </template>
 
 <script setup>
 import { reactive, ref, computed, watch, onMounted } from 'vue'
-
 import StepProgress from '@/components/common/StepProgress.vue'
-import Step1 from './CraftsmanStep/Step1.vue'
-import Step2 from './CraftsmanStep/Step2.vue'
-import Step3 from './CraftsmanStep/Step3.vue'
-import Step4 from './CraftsmanStep/Step4.vue'
+import Step1 from './EntrepriseStep/Step1.vue'
+import Step2 from './EntrepriseStep/Step2.vue'
+import Step3 from './EntrepriseStep/Step3.vue'
+import Step4 from './EntrepriseStep/Step4.vue'
 import { validateStep } from '@/utils/validators/register/craftsman-validator'
 import { useToast } from '@/composables/useToast'
 import BaseButton from '@/components/common/BaseButton.vue'
 import api from '@/utils/api'
-import { handleApiError } from '../../utils/handleApiError'
-import Container from '../../components/common/Container.vue'
 
 const { addToast } = useToast()
 
@@ -64,8 +57,6 @@ const steps = [
 const currentStep = ref(1)
 
 const form = reactive({
-  accountType: 'craftman_individual', // Doit correspondre à l'initialisation de Step1
-
   // étape 1
   nip: '',
   name: '',
@@ -125,21 +116,22 @@ async function nextStep() {
   // Étape 2 → register
   if (currentStep.value === 2) {
     try {
-      // Champs strictement nécessaires à l'API register
-      const payload = {
-        name: form.name,
-        firstname: form.firstname,
-        email: form.email,
-        telephone: form.telephone,
-        password: form.password,
-        password_confirmation: form.password_confirmation,
-      }
+      const formData = new FormData()
+      Object.entries(form).forEach(([k, v]) => {
+        if (v === null || v === '') return // on saute les vides
+        if (Array.isArray(v)) {
+          v.forEach((f, i) => formData.append(`${k}[${i}]`, f))
+        } else {
+          formData.append(k, v)
+        }
+      })
 
-      console.log('Payload envoyé:', payload)
+      for (let [key, value] of formData.entries()) {
+  console.log(key, value)
+}
 
-      const res = await api.post('/register', payload, {
-        // headers: { 'Content-Type': 'multipart/form-data' },
-        headers: { 'Content-Type': 'application/json' },
+      const res = await api.post('/register', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       })
 
       if (res.data.success) {
@@ -158,10 +150,8 @@ async function nextStep() {
         addToast("Erreur lors de l'inscription", 'error')
       }
     } catch (e) {
-      handleApiError(e, addToast)
-      // console.error("Erreur API register:", e.response?.data || e.message)
-      // console.error(e)
-      // addToast('Erreur API register', 'error')
+      console.error(e)
+      addToast('Erreur API register', 'error')
     }
     return
   }

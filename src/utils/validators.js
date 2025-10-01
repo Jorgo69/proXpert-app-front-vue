@@ -16,16 +16,16 @@ export const rulesFactory = {
 
 // Déclaration des règles par champ
 const fieldRules = {
-  nipi: [ rulesFactory.required('NIPI/IFU requis') ],
-  nom: [ rulesFactory.required('Nom requis') ],
-  prenom: [ rulesFactory.required('Prénom requis') ],
+  nip: [ rulesFactory.required('NIPI/IFU requis') ], // npi: 10, ifu:13
+  name: [ rulesFactory.required('Nom requis') ],
+  firstname: [ rulesFactory.required('Prénom requis') ],
   email: [ rulesFactory.required('Email requis'), rulesFactory.email() ],
   telephone: [
     rulesFactory.required('Téléphone requis'),
     (v) => (/^\+?[\d\s]{8,20}$/.test(String(v || ''))) || 'Téléphone invalide',
 
   ],
-  adresse: [ rulesFactory.required('Adresse requise') ],
+  location: [ rulesFactory.required('Adresse requise') ],
   password: [ rulesFactory.required('Mot de passe requis'), rulesFactory.minLength(6) ],
   passwordConfirm: [
     rulesFactory.required('Confirmation requise'),
@@ -38,7 +38,14 @@ const fieldRules = {
   specialite: [ rulesFactory.required('Spécialité requise') ],
   experience: [ rulesFactory.required('Sélectionnez l\'expérience') ],
 
-  // étape 3
+  // etape 3 [verification via code tel]
+  verificationCode: [
+  rulesFactory.required('Code de vérification requis'),
+  rulesFactory.minLength(6, 'Le code doit comporter 6 chiffres')
+],
+
+
+  // étape 4
   plan: [ rulesFactory.required('Choisissez un plan') ],
   acceptConditions: [
   (v) => v === true || 'Vous devez accepter les conditions.'
@@ -50,7 +57,8 @@ export function validateStep(stepNumber, form) {
   const fieldsByStep = {
     1: ['nipi','nom','prenom','email','telephone','adresse','password','passwordConfirm'],
     2: ['secteur','metier','specialite','experience'],
-    3: ['plan', 'acceptConditions'],
+    3: ['verificationCode'],
+    4: ['plan', 'acceptConditions'],
   }
   const errors = {}
   const toCheck = fieldsByStep[stepNumber] || []

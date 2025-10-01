@@ -14,7 +14,7 @@
       :class="inputClasses"
     />
 
-    <p v-if="error" class="text-red-500 text-xs">{{ error }}</p>
+    <span v-if="error" class="text-red-500 text-xs">{{ error }}</span>
   </div>
 </template>
 

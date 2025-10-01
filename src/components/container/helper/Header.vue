@@ -48,10 +48,10 @@
 
         <!-- Auth -->
         <div class="flex gap-2">
-          <BaseButton variant="primary">
+          <BaseButton variant="primary" @click="goTo('register')">
             {{ $t('S\'inscrire') }}
           </BaseButton>
-          <BaseButton variant="secondary">
+          <BaseButton variant="secondary" @click="goTo()">
             {{ $t('Se connecter') }}
           </BaseButton>
         </div>
