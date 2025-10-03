@@ -52,7 +52,7 @@ import api from '@/utils/api'
 import { handleApiError } from '../../utils/handleApiError'
 import Container from '../../components/common/Container.vue'
 
-const { addToast } = useToast()
+const { addToast } = useToast();
 
 const steps = [
   { number: 1, title: 'Informations personnelles' },

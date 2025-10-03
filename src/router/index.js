@@ -3,6 +3,7 @@ import Home from '../views/Home.vue'
 import Header from '../components/container/helper/Header.vue'
 import About from '../views/About.vue'
 import Register from '../views/Auth/Register.vue'
+import Login from '../views/Auth/Login.vue'
 
 const routes = [
   {
@@ -24,7 +25,12 @@ const routes = [
   path: '/registrer/craftman/informations',
   name: 'ArtisanInfo',
   component: () => import('@/views/Auth/Craftsman.vue')
-}
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: Login,
+  }
 
 
 
