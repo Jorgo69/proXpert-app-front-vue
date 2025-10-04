@@ -12,7 +12,7 @@
         buttonText="Commencer mon Inscription"
         buttonVariant="primary"
         buttonType="link"
-        buttonLink="/register/artisan"
+        buttonLink="/registrer/craftman/informations"
       />
 
       <ReasonCard
@@ -21,7 +21,7 @@
         buttonText="Rechercher un professionnel"
         buttonVariant="secondary"
         buttonType="link"
-        buttonLink="/search"
+        buttonLink="/"
       />
     </div>
   </Container>

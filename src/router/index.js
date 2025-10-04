@@ -4,6 +4,7 @@ import Header from '../components/container/helper/Header.vue'
 import About from '../views/About.vue'
 import Register from '../views/Auth/Register.vue'
 import Login from '../views/Auth/Login.vue'
+import Dashboard from '../views/Dashboard.vue'
 
 const routes = [
   {
@@ -30,6 +31,11 @@ const routes = [
     path: '/login',
     name: 'login',
     component: Login,
+  },
+  {
+    path: '/dashboard',
+    name: 'dashboard',
+    component: Dashboard
   }
 
 
